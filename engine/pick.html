@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>选一个喜欢的风格</title>
+<style>
+  /* 选风格页：每个格子里是真正的海报模板，用的是用户这一次的内容。这个页面只管选，原尺寸的图由技能渲染。
+     网址参数：content、fonts、size 同模板；shot=1 是给启动脚本截总览图用的（固定四列，不显示说明和底栏）。
+     就绪后在 <html> 上写 data-ready="1"、data-height（整页高度）、data-checks（每个风格的自查结果）。 */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f1f0ec; color: #1c1b1a; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; padding: 28px 24px 120px; }
+  header { max-width: 1320px; margin: 0 auto 22px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
+  h1 { font-size: 28px; font-weight: 600; }
+  header p { font-size: 16px; color: #66625b; margin-top: 8px; line-height: 1.6; max-width: 46em; }
+  .sizes { display: flex; border: 2px solid #1c1b1a; border-radius: 999px; overflow: hidden; flex: none; }
+  .sizes button { font: inherit; font-size: 15px; font-weight: 600; background: none; color: #1c1b1a; border: 0; padding: 8px 18px; cursor: pointer; }
+  .sizes button.on { background: #1c1b1a; color: #fff; }
+  .grid { max-width: 1320px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 22px 18px; }
+  .card { text-align: left; }
+  .frame { position: relative; width: 100%; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 10px; background: #ddd; box-shadow: 0 6px 18px rgba(0,0,0,.14); outline: 0 solid #1c1b1a; transition: outline-width .12s; cursor: pointer; }
+  html[data-size="3x4"] .frame { aspect-ratio: 3 / 4; }
+  .frame iframe { position: absolute; left: 0; top: 0; width: 1080px; height: 1920px; border: 0; transform-origin: 0 0; pointer-events: none; }
+  html[data-size="3x4"] .frame iframe { height: 1440px; }
+  .card.on .frame { outline-width: 5px; outline-offset: 3px; }
+  .card.on .frame::after { content: "✓"; position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border-radius: 50%; background: #1c1b1a; color: #fff; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  .name { display: flex; align-items: center; gap: 10px; margin-top: 12px; font-size: 18px; font-weight: 600; cursor: pointer; }
+  .name i { font-style: normal; flex: none; width: 28px; height: 28px; border-radius: 50%; background: #1c1b1a; color: #fff; font-size: 15px; display: flex; align-items: center; justify-content: center; }
+  .use { font-size: 14px; color: #66625b; margin: 4px 0 0 38px; }
+  .zoom { margin: 8px 0 0 38px; font-size: 14px; color: #1c1b1a; text-decoration: underline; background: none; border: 0; cursor: pointer; padding: 0; font-family: inherit; }
+
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; background: #1c1b1a; color: #fff; padding: 14px 24px; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+  .bar span { font-size: 16px; }
+  .bar b { font-weight: 600; }
+  .bar button { font: inherit; font-size: 16px; font-weight: 600; background: #ffe033; color: #1c1b1a; border: 0; border-radius: 999px; padding: 10px 24px; cursor: pointer; }
+  .bar button[disabled] { opacity: .45; cursor: default; }
+
+  .big { position: fixed; inset: 0; background: rgba(0,0,0,.78); display: none; align-items: center; justify-content: center; z-index: 9; cursor: zoom-out; }
+  .big.show { display: flex; }
+  .big .frame { width: auto; height: 92vh; max-width: 94vw; border-radius: 8px; cursor: zoom-out; }
+
+  @media (max-width: 560px) { body { padding: 20px 14px 130px; } .grid { grid-template-columns: 1fr 1fr; gap: 18px 12px; } h1 { font-size: 24px; } .use, .zoom { margin-left: 0; } }
+
+  /* 截总览图：固定四列，只留编号、名字和适合的场景 */
+  html[data-shot] body { width: 1600px; padding: 24px 24px 28px; }
+  html[data-shot] header, html[data-shot] .bar, html[data-shot] .zoom { display: none; }
+  html[data-shot] .grid { max-width: none; grid-template-columns: repeat(4, 1fr); gap: 26px 20px; }
+  html[data-shot] .name { font-size: 24px; margin-top: 14px; }
+  html[data-shot] .name i { width: 36px; height: 36px; font-size: 20px; }
+  html[data-shot] .use { font-size: 18px; margin-left: 46px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>选一个喜欢的风格</h1>
+    <p>下面都是用你这次的内容排出来的。点一下选中，再点底下的“复制这句话”，发给 AI，它就按这个风格出原尺寸的图。直接告诉它风格的名字也行。</p>
+  </div>
+  <div class="sizes" id="sizes"><button type="button" data-size="9x16">竖长版 9:16</button><button type="button" data-size="3x4">小红书版 3:4</button></div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<div class="bar">
+  <span id="picked">还没有选</span>
+  <button id="copy" type="button" disabled>复制这句话</button>
+</div>
+<div class="big" id="big"><div class="frame"><iframe id="bigframe" title="放大看"></iframe></div></div>
+
+<script src="styles.js"></script>
+<script>
+(function () {
+  var root = document.documentElement;
+  var q = new URLSearchParams(location.search);
+  var STYLES = window.POSTER_STYLES || [];
+  var size = q.get('size') === '3x4' ? '3x4' : '9x16';
+  var SIZE_NAMES = { '9x16': '竖长版', '3x4': '小红书版' };
+  var shot = q.get('shot') === '1';
+  if (shot) root.setAttribute('data-shot', '1');
+  var grid = document.getElementById('grid'), picked = null;
+  var checks = {}, waiting = 0, timer = null;
+
+  function src(style) {
+    var p = new URLSearchParams();
+    ['content', 'fonts'].forEach(function (k) { if (q.get(k)) p.set(k, q.get(k)); });
+    p.set('size', size); p.set('style', style.slug);
+    return '../styles/' + encodeURIComponent(style.slug) + '/template.html?' + p.toString();
+  }
+  function scale() {
+    Array.prototype.forEach.call(document.querySelectorAll('.frame'), function (f) {
+      var frame = f.querySelector('iframe');
+      if (frame && f.clientWidth) frame.style.transform = 'scale(' + (f.clientWidth / 1080) + ')';
+    });
+  }
+  function ready() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    STYLES.forEach(function (s) { if (!checks[s.slug]) checks[s.slug] = { timeout: true }; });
+    root.setAttribute('data-checks', JSON.stringify(checks));
+    root.setAttribute('data-height', String(Math.ceil(document.documentElement.scrollHeight)));
+    root.setAttribute('data-ready', '1');
+  }
+  function load() {
+    root.setAttribute('data-size', size);
+    root.removeAttribute('data-ready');
+    checks = {}; waiting = STYLES.length;
+    Array.prototype.forEach.call(document.querySelectorAll('#sizes button'), function (b) { b.classList.toggle('on', b.getAttribute('data-size') === size); });
+    Array.prototype.forEach.call(grid.querySelectorAll('.card'), function (card, i) { card.querySelector('iframe').src = src(STYLES[i]); });
+    scale();
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(ready, 20000);  // 个别风格迟迟没动静也不能让整页一直等
+    if (!STYLES.length) ready();
+    if (picked !== null) pick(picked);
+  }
+
+  STYLES.forEach(function (s, i) {
+    var card = document.createElement('div');
+    card.className = 'card';
+    var frame = document.createElement('div'); frame.className = 'frame';
+    var iframe = document.createElement('iframe'); iframe.title = s.name; frame.appendChild(iframe);
+    var name = document.createElement('div'); name.className = 'name';
+    var n = document.createElement('i'); n.textContent = String(i + 1); name.appendChild(n); name.appendChild(document.createTextNode(s.name));
+    var use = document.createElement('div'); use.className = 'use'; use.textContent = s.use || '';
+    var zoom = document.createElement('button'); zoom.className = 'zoom'; zoom.type = 'button'; zoom.textContent = '放大看';
+    frame.addEventListener('click', function () { pick(i); });
+    name.addEventListener('click', function () { pick(i); });
+    zoom.addEventListener('click', function () {
+      document.getElementById('bigframe').src = src(s);
+      document.getElementById('big').classList.add('show');
+      setTimeout(scale, 0);
+    });
+    [frame, name, use, zoom].forEach(function (el) { card.appendChild(el); });
+    grid.appendChild(card);
+  });
+
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!d || typeof d !== 'object' || !d.posterCheck || !d.style) return;
+    if (d.posterCheck.size !== size || checks[d.style]) return;  // 放大看的那一个、切换尺寸前的旧结果都不算
+    if (!STYLES.some(function (s) { return s.slug === d.style; })) return;
+    checks[d.style] = d.posterCheck;
+    if (--waiting <= 0) ready();
+  });
+
+  function sentence() { return '用「' + STYLES[picked].name + '」风格出图，' + SIZE_NAMES[size]; }
+  function pick(i) {
+    picked = i;
+    Array.prototype.forEach.call(grid.querySelectorAll('.card'), function (c, k) { c.classList.toggle('on', k === i); });
+    var box = document.getElementById('picked');
+    box.textContent = '';
+    box.appendChild(document.createTextNode('已选：'));
+    var b = document.createElement('b'); b.textContent = STYLES[i].name; box.appendChild(b);
+    box.appendChild(document.createTextNode('　把这句话发给 AI：' + sentence()));
+    var btn = document.getElementById('copy'); btn.disabled = false; btn.textContent = '复制这句话';
+  }
+  document.getElementById('big').addEventListener('click', function () { this.classList.remove('show'); document.getElementById('bigframe').removeAttribute('src'); });
+  document.getElementById('copy').addEventListener('click', function () {
+    var text = sentence(), btn = this;
+    function done() { btn.textContent = '已复制'; }
+    function old() { var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) {} t.remove(); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, old); else old();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#sizes button'), function (b) {
+    b.addEventListener('click', function () { if (b.getAttribute('data-size') !== size) { size = b.getAttribute('data-size'); load(); } });
+  });
+  window.addEventListener('resize', scale);
+  load();
+})();
+</script>
+</body>
+</html>

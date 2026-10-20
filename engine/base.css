@@ -1,0 +1,30 @@
+/* 所有风格共用的底子：尺寸、单位、隐藏规则。
+   模板里的尺寸一律用 rem：竖长版 1rem = 10px；小红书版整体缩到 78%，再由各风格自己微调。 */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 10px; }
+html[data-size="3x4"] { font-size: 7.8px; }
+html, body { width: 1080px; height: 1920px; overflow: hidden; }
+html[data-size="3x4"], html[data-size="3x4"] body { height: 1440px; }
+body { position: relative; }
+.poster { position: relative; width: 1080px; height: 100%; overflow: hidden; display: flex; flex-direction: column; }
+.grow { flex: 1 1 0; min-height: 0; }
+[hidden] { display: none !important; }
+/* 并排的两项之间的分隔符：写成 <span class="join"><span data-s=…></span><span data-s=…></span></span>，两项都在才出现 */
+.join > :not([hidden]) ~ :not([hidden])::before { content: " · "; }
+.join.slash > :not([hidden]) ~ :not([hidden])::before { content: " ／ "; }
+[data-qr] img, [data-qr] svg { width: 100%; height: 100%; display: block; }
+[data-logo] img { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* 跟主办方名字排在一行的小标志：高度跟着字走，宽度按图片比例 */
+.logo-inline[data-logo] { display: inline-block; height: 1.5em; vertical-align: -.36em; margin-right: .45em; }
+.logo-inline[data-logo] img { width: auto; height: 100%; }
+/* 细字用系统自带的黑体，粗字和特粗字用下载的思源黑体 */
+:root {
+  --thin: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+  --bold: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --serif: "Noto Serif SC", "Songti SC", "SimSun", serif;
+}
+/* 小红书版整体缩小了，最小的那行字要顶回 18 像素 */
+html[data-size="3x4"] .fine { font-size: 2.3rem; }
+/* 铺在最底下的装饰（底纹、光晕）加 class="bg"；其余内容都排在它上面 */
+.poster > .bg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.poster > :not(.bg) { position: relative; z-index: 1; }

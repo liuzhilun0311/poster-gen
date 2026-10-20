@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>弥散渐变</title>
+<meta name="poster-fonts" content="Noto Serif SC, Noto Sans SC, Playfair Display">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：带颗粒的渐变底，和标题、价格上同一道渐变色。其余都是整齐的磨砂卡片。 */
+  :root { --ink: #33224a; --soft: #6c5a82; --grad: linear-gradient(100deg, #ff5d73 0%, #ff4fb0 50%, #7a4dff 100%); }
+  body { background: #fff5ea; color: var(--ink); font-family: var(--bold); font-weight: 700; }
+  .poster { padding: 6.4rem 6rem 4.6rem; }
+  .serif { font-family: var(--serif); font-weight: 900; }
+  .poster > .m { border-radius: 50%; filter: blur(12rem); }
+  .poster > .grain { width: 100%; height: 100%; mix-blend-mode: soft-light; opacity: .7; }
+  .glass { background: rgba(255,255,255,.58); border: .2rem solid rgba(255,255,255,.95); -webkit-backdrop-filter: blur(2.4rem); backdrop-filter: blur(2.4rem); box-shadow: 0 2.4rem 6rem rgba(90,50,140,.12); }
+
+  .top { display: flex; justify-content: space-between; font-size: 2.8rem; letter-spacing: .6rem; min-height: 4rem; padding: 0 .4rem; white-space: nowrap; }
+  .top .issue { margin-left: auto; }
+  .kicker { margin: 7rem 0 0 .4rem; font-size: 3.4rem; letter-spacing: .6rem; color: var(--soft); }
+  .title { margin: 1.6rem 0 0 -.4rem; }
+  .title .l { line-height: 0; }
+  .title .l span { display: inline-block; white-space: nowrap; font-size: 17.6rem; line-height: 1.14; letter-spacing: .2rem; }
+  /* 最后一行用渐变色；只有一行时也用 */
+  .title .l.is-last span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .slogan { margin: 2.2rem 0 0 .4rem; font-family: var(--thin); font-size: 3.4rem; font-weight: 500; letter-spacing: .3rem; color: var(--soft); }
+
+  .price { height: 30rem; border-radius: 4.8rem; display: flex; align-items: center; justify-content: space-between; padding: 0 5.2rem 0 4.4rem; }
+  .price .pr { display: inline-flex; align-items: baseline; font-size: 24.4rem; line-height: 1; font-family: "Playfair Display", var(--serif); font-style: italic; font-weight: 800; font-variant-numeric: lining-nums; white-space: nowrap; padding-right: .12em;
+    background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .price .cur { font-size: .46em; margin-right: .02em; font-style: normal; }
+  .price .n { letter-spacing: -.025em; }
+  .price .side { flex: none; text-align: right; }
+  .price .lab { display: inline-block; background: var(--ink); color: #fff; font-size: 3rem; letter-spacing: .6rem; border-radius: 99rem; padding: .7rem 2.4rem .8rem 3rem; white-space: nowrap; }
+  .price .orig { font-family: var(--thin); font-size: 3rem; font-weight: 500; color: var(--soft); text-decoration: line-through; margin-top: 1.6rem; white-space: nowrap; }
+  .price .note { font-size: 3.1rem; margin-top: .8rem; white-space: nowrap; }
+
+  .pts { margin-top: 3.6rem; height: 19.6rem; border-radius: 4rem; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; }
+  .pts[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+  .pts[data-count="1"] { grid-template-columns: 1fr; }
+  .pt { text-align: center; padding: 0 1rem; min-width: 0; }
+  .pt:not(.is-first) { border-left: .2rem solid rgba(51,34,74,.16); }
+  .pt h3 { line-height: 0; }
+  .pt h3 span { display: inline-block; font-size: 3.3rem; line-height: 1.3; white-space: nowrap; letter-spacing: .1rem; }
+  .pt p { font-family: var(--thin); font-size: 2.3rem; font-weight: 500; color: var(--soft); margin-top: .8rem; }
+
+  .bottom { display: flex; justify-content: space-between; align-items: flex-end; min-height: 6rem; padding: 0 .4rem; }
+  .info .date { font-size: 7.8rem; line-height: 1.1; letter-spacing: .1rem; white-space: nowrap; font-variant-numeric: lining-nums; }
+  .info .sub { font-size: 2.9rem; margin-top: .6rem; white-space: nowrap; }
+  .info .sub :not([hidden]) ~ b { margin-left: 1.6rem; }
+  .contact { font-size: 2.5rem; margin-top: 3rem; }
+  .fine { font-family: var(--thin); font-size: 1.9rem; font-weight: 500; color: var(--soft); line-height: 1.6; margin-top: .4rem; }
+  .qr-box { flex: none; text-align: center; margin-left: 2rem; }
+  .qr { width: 18.8rem; height: 18.8rem; border-radius: 2.8rem; padding: 1.4rem; background: rgba(255,255,255,.9); }
+  .qr-box p { font-size: 2.3rem; letter-spacing: .5rem; margin: 1rem -.5rem 0 0; white-space: nowrap; }
+
+  /* 没有价格：卖点卡片加高、字放大 */
+  .price[hidden] + .pts { height: 26rem; margin-top: 0; }
+  .price[hidden] + .pts h3 span { --fit-max: 4.2; }
+  .price[hidden] + .pts p { font-size: 2.6rem; margin-top: 1.4rem; }
+
+  /* 小红书版 */
+  html[data-size="3x4"] .poster { padding-top: 5.2rem; }
+  html[data-size="3x4"] .kicker { margin-top: 4.6rem; }
+  html[data-size="3x4"] .title .l span { --fit-max: 15.4; }
+  html[data-size="3x4"] .price { height: 25rem; }
+  html[data-size="3x4"] .price .pr { --fit-max: 21; }
+  html[data-size="3x4"] .pts { height: 16.6rem; margin-top: 2.8rem; }
+  html[data-size="3x4"] .contact { margin-top: 1.8rem; }
+  html[data-size="3x4"] .fine { font-size: 2.3rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 20rem; height: 20rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <i class="bg m" style="inset:-26rem auto auto -28rem;width:90rem;height:90rem;background:#ff9f8a;opacity:.85"></i>
+  <i class="bg m" style="inset:14% -32rem auto auto;width:86rem;height:86rem;background:#b9a6ff;opacity:.9"></i>
+  <i class="bg m" style="inset:auto auto -36rem -20rem;width:100rem;height:90rem;background:#8ec9ff;opacity:.85"></i>
+  <i class="bg m" style="inset:auto -30rem -20rem auto;width:64rem;height:64rem;background:#ff9fcb;opacity:.6"></i>
+  <svg class="bg grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".8" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)"/></svg>
+
+  <div class="top"><span data-need="brand logo"><span class="logo-inline" data-logo></span><span data-s="brand"></span></span><span class="issue" data-s="issue"></span></div>
+  <div class="kicker" data-s="kicker"></div>
+  <div class="title serif" data-count>
+    <div class="l" data-need="title.0"><span data-s="title.0" data-fit="960" data-max="17.6"></span></div>
+    <div class="l" data-need="title.1"><span data-s="title.1" data-fit="960" data-max="17.6"></span></div>
+    <div class="l" data-need="title.2"><span data-s="title.2" data-fit="960" data-max="17.6"></span></div>
+  </div>
+  <div class="slogan" data-s="slogan"></div>
+  <div class="grow"></div>
+
+  <div class="price glass" data-need="price.num">
+    <div class="pr" data-fit="560" data-max="24.4"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div>
+    <div class="side">
+      <div class="lab" data-s="price.label"></div>
+      <div class="orig" data-s="price.orig"></div>
+      <div class="note" data-s="price.note"></div>
+    </div>
+  </div>
+
+  <div class="pts glass" data-count>
+    <div class="pt" data-need="points.0.h"><h3 class="serif"><span data-s="points.0.h" data-fit="280" data-max="3.3"></span></h3><p data-s="points.0.p"></p></div>
+    <div class="pt" data-need="points.1.h"><h3 class="serif"><span data-s="points.1.h" data-fit="280" data-max="3.3"></span></h3><p data-s="points.1.p"></p></div>
+    <div class="pt" data-need="points.2.h"><h3 class="serif"><span data-s="points.2.h" data-fit="280" data-max="3.3"></span></h3><p data-s="points.2.p"></p></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="bottom" data-need="date dateNote place contact fine.0 qr.text qr.image">
+    <div class="info">
+      <div class="date serif" data-s="date"></div>
+      <div class="sub" data-need="dateNote place"><span data-s="dateNote"></span><b data-s="place"></b></div>
+      <div class="contact join" data-need="contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+    <div class="qr-box" data-need="qr.text qr.image"><div class="qr" data-qr data-dark="#33224a"></div><p data-s="qr.cap"></p></div>
+  </div>
+</div>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

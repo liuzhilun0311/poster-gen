@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>先锋大字</title>
+<meta name="poster-fonts" content="Noto Sans SC, Playfair Display">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：标题第一行的几个字占掉半张海报。 */
+  :root { --paper: #ecebe5; --ink: #0f0f0f; --red: #e4002b; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--bold); font-weight: 900; }
+  .poster { padding: 3.6rem 4.4rem 3.6rem; }
+  .poster > .grain { width: 100%; height: 100%; mix-blend-mode: multiply; opacity: .4; }
+  .fx { position: absolute; width: 0; height: 0; }
+
+  .top { display: flex; justify-content: space-between; gap: 2rem; font-size: 2.3rem; font-weight: 700; letter-spacing: .7rem; padding-bottom: 1.4rem; border-bottom: .3rem solid var(--ink); white-space: nowrap; min-height: 5rem; }
+  .top .issue { margin-left: auto; }
+
+  .title { margin: 0 -1.4rem; }
+  .giant { --cols: 2; font-size: calc(99.6rem / var(--cols)); width: calc(var(--cols) * 1.024em); line-height: .9; letter-spacing: -.02em; display: flex; flex-wrap: wrap; margin-top: 1rem; }
+  .giant[data-n="1"] { --cols: 1; font-size: 49.8rem; }
+  .giant[data-n="5"], .giant[data-n="6"] { --cols: 3; }
+  .giant[data-n="7"], .giant[data-n="8"], .giant[data-n="9"], .giant[data-n="10"], .giant[data-n="11"], .giant[data-n="12"] { --cols: 4; }
+  .giant .c { width: calc(100% / var(--cols)); text-align: center; }
+  .giant .sp { display: none; }
+  .giant .c:nth-child(4n+2), .giant .c:nth-child(4n+3) { position: relative; top: .028em; }
+  .disc { position: absolute; right: 2.4rem; top: 4rem; width: 23rem; height: 23rem; border-radius: 50%; background: var(--red); mix-blend-mode: multiply; filter: url(#rough); pointer-events: none; }
+  .strip { margin: -.6rem -3rem 0; height: 7.8rem; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; white-space: nowrap; position: relative; z-index: 2; }
+  .strip span { display: inline-block; font-size: 4.4rem; letter-spacing: 1.05em; padding-left: 1.05em; }
+  .redline { margin: 1.4rem 0 0 -.4rem; line-height: 0; transform: rotate(-5deg); transform-origin: left center; mix-blend-mode: multiply; filter: url(#rough); }
+  .redline span { display: inline-block; font-size: 26.2rem; line-height: 1.05; letter-spacing: .4rem; color: var(--red); white-space: nowrap; }
+  /* 标题只有两行时，第二行用红色大字，不用黑条 */
+  .redline.alt { display: none; }
+  .title[data-count="2"] .strip { display: none; }
+  .title[data-count="2"] .redline.alt { display: block; margin-top: 9rem; }
+  /* 第一行字多、每个字变小时，红色圆会把一个字整个盖住，就不放了（小红书版的圆在字的右边，不受影响） */
+  html[data-size="9x16"] .giant:not([data-n="1"], [data-n="2"], [data-n="3"], [data-n="4"]) + .disc { display: none; }
+
+  .mid { display: flex; justify-content: space-between; align-items: flex-start; gap: 3rem; }
+  .pts { flex: none; width: 40rem; border-bottom: .2rem solid var(--ink); }
+  .pt { padding: .8rem 0 1rem; border-top: .2rem solid var(--ink); }
+  .pt h3 { font-size: 3.2rem; letter-spacing: .1rem; white-space: nowrap; }
+  .pt p { font-family: var(--thin); font-size: 2.3rem; font-weight: 500; color: #4a4a48; white-space: nowrap; }
+  .price { position: relative; margin-left: auto; text-align: right; }
+  .price .lab { position: absolute; right: 0; top: -.2rem; font-size: 3.2rem; letter-spacing: 1.2rem; display: flex; align-items: center; white-space: nowrap; }
+  .price .lab::before { content: ""; width: 2.6rem; height: 2.6rem; background: var(--red); margin-right: 1.6rem; }
+  .price .pr { display: flex; justify-content: flex-end; padding-top: 4.4rem; }
+  .price .pr > div { display: inline-flex; align-items: baseline; font-family: "Playfair Display", var(--serif); font-style: italic; font-weight: 900; font-variant-numeric: lining-nums; font-size: 23.6rem; line-height: 1; white-space: nowrap; }
+  .price .cur { font-size: .41em; font-style: normal; margin-right: .03em; }
+  .price .n { letter-spacing: -.025em; padding-right: .07em; }
+  .price .sub { font-size: 2.4rem; font-weight: 700; margin-top: .6rem; white-space: nowrap; }
+  .price .orig { text-decoration: line-through; color: #555; margin-right: 1.8rem; font-weight: 500; }
+  .price .note { background: var(--ink); color: var(--paper); padding: .4rem 1.6rem; }
+  /* 没有价格时卖点横着排满一行 */
+  .mid:has(.price[hidden]) .pts { width: auto; flex: 1 1 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 3rem; border-bottom: 0; }
+  .mid:has(.price[hidden]) .pts[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+  .mid:has(.price[hidden]) .pts[data-count="1"] { grid-template-columns: 1fr; }
+  .mid:has(.price[hidden]) .pt { border-top-width: .5rem; padding-top: 1.4rem; min-width: 0; }
+  .mid:has(.price[hidden]) .pt p { white-space: normal; }
+
+  .info { border-top: .3rem solid var(--ink); padding-top: 1.2rem; display: flex; justify-content: space-between; min-height: 6rem; }
+  .date { font-size: 5.8rem; line-height: 1.05; letter-spacing: -.1rem; white-space: nowrap; }
+  .sub2 { font-size: 2.3rem; font-weight: 700; margin-top: .4rem; white-space: nowrap; }
+  .sub2 b { color: var(--red); }
+  .sub2 :not([hidden]) ~ b { margin-left: 1.4rem; }
+  .contact { font-size: 2rem; font-weight: 700; margin-top: 1rem; letter-spacing: .1rem; }
+  .fine { font-family: var(--thin); font-size: 1.9rem; font-weight: 500; color: #4a4a48; line-height: 1.5; margin-top: .2rem; }
+  .qr-box { flex: none; display: flex; gap: 1rem; align-items: flex-start; margin-left: 2rem; }
+  .qr-box p { writing-mode: vertical-rl; font-size: 2rem; letter-spacing: .8rem; }
+  .qr { width: 14.4rem; height: 14.4rem; }
+
+  /* 小红书版：大字收小一号，靠左，右边留给红色圆 */
+  html[data-size="3x4"] .poster { padding-top: 3rem; }
+  html[data-size="3x4"] .giant { font-size: calc(84rem / var(--cols)); }
+  html[data-size="3x4"] .giant[data-n="1"] { font-size: 42rem; }
+  html[data-size="3x4"] .disc { top: 6rem; right: 5rem; width: 26rem; height: 26rem; }
+  html[data-size="3x4"] .redline span { --fit-max: 21; }
+  html[data-size="3x4"] .price .pr > div { --fit-max: 19; }
+  html[data-size="3x4"] .price .pr { padding-top: 3.6rem; }
+  html[data-size="3x4"] .pt { padding: .5rem 0 .7rem; }
+  html[data-size="3x4"] .contact, html[data-size="3x4"] .fine, html[data-size="3x4"] .qr-box p { font-size: 2.3rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 17.2rem; height: 17.2rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <svg class="fx"><filter id="rough" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="3" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="11" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="2" result="f"/><feDisplacementMap in="d" in2="f" scale="5"/></filter></svg>
+
+  <div class="top"><span data-need="brand logo"><span class="logo-inline" data-logo></span><span data-s="brand"></span></span><span data-s="kicker"></span><span class="issue" data-s="issue"></span></div>
+  <div class="title" data-count>
+    <div data-need="title.0"><div class="giant" data-s="title.0" data-chars></div><div class="disc"></div></div>
+    <div class="strip" data-need="title.1"><span data-s="title.1" data-fit="1000" data-max="4.4"></span></div>
+    <div class="redline" data-need="title.2"><span data-s="title.2" data-fit="1010" data-max="26.2"></span></div>
+    <div class="redline alt" data-skip data-need="title.1"><span data-s="title.1" data-fit="1010" data-max="26.2"></span></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="mid" data-need="points.0.h price.num">
+    <div class="pts" data-count>
+      <div class="pt" data-need="points.0.h"><h3 data-s="points.0.h"></h3><p data-s="points.0.p"></p></div>
+      <div class="pt" data-need="points.1.h"><h3 data-s="points.1.h"></h3><p data-s="points.1.p"></p></div>
+      <div class="pt" data-need="points.2.h"><h3 data-s="points.2.h"></h3><p data-s="points.2.p"></p></div>
+    </div>
+    <div class="price" data-need="price.num">
+      <div class="lab" data-s="price.label"></div>
+      <div class="pr"><div data-fit="540" data-max="23.6"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div></div>
+      <div class="sub"><span class="orig" data-s="price.orig"></span><span class="note" data-s="price.note"></span></div>
+    </div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="info" data-need="date dateNote place contact fine.0 qr.text qr.image">
+    <div>
+      <div class="date" data-s="date"></div>
+      <div class="sub2" data-need="dateNote place"><span data-s="dateNote"></span><b data-s="place"></b></div>
+      <div class="contact join" data-need="contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+    <div class="qr-box" data-need="qr.text qr.image"><p data-s="qr.cap"></p><div class="qr" data-qr data-dark="#0f0f0f" data-light="#ecebe5"></div></div>
+  </div>
+
+  <svg class="bg grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)"/></svg>
+</div>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

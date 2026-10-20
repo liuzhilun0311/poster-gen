@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>小红书界面风</title>
+<meta name="poster-fonts" content="Noto Sans SC">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：整张做成一个浏览器窗口，标题最后一行带选中框。 */
+  :root { --ink: #111; --blue: #2f6bff; --yellow: #ffd84a; --note: #fff7cf; }
+  body { background: #e3e9ff; color: var(--ink); font-family: var(--bold); font-weight: 900; }
+  .poster { padding: 6rem 4.4rem 4.4rem; }
+  .dots { background-image: radial-gradient(rgba(47,107,255,.22) .25rem, transparent .3rem); background-size: 3.6rem 3.6rem; }
+  .ui { border: .5rem solid var(--ink); box-shadow: 1.2rem 1.2rem 0 var(--ink); background: #fff; }
+
+  .win { border-radius: 4rem; margin-right: 1.2rem; padding-bottom: 3.6rem; }
+  .bar { height: 8.6rem; border-bottom: .5rem solid var(--ink); display: flex; align-items: center; padding: 0 2.8rem; gap: 1.4rem; background: var(--yellow); border-radius: 3.4rem 3.4rem 0 0; }
+  .bar i { flex: none; width: 2.4rem; height: 2.4rem; border-radius: 50%; border: .4rem solid var(--ink); background: #ff5f57; }
+  .bar i:nth-child(2) { background: #fff; } .bar i:nth-child(3) { background: #28c840; }
+  .tab { margin-left: 1.6rem; align-self: flex-end; height: 6.2rem; background: #fff; border: .5rem solid var(--ink); border-bottom: 0; border-radius: 2rem 2rem 0 0; padding: 0 2.6rem; display: flex; align-items: center; font-size: 2.7rem; position: relative; top: .5rem; white-space: nowrap; overflow: hidden; }
+  .bar .issue { flex: none; margin-left: auto; font-size: 2.5rem; background: var(--ink); color: #fff; border-radius: 99rem; padding: .6rem 2.2rem; white-space: nowrap; }
+  .addr { margin: 2.6rem 3.4rem 0; height: 7.6rem; border: .5rem solid var(--ink); border-radius: 99rem; background: #f2f4fa; display: flex; align-items: center; padding: 0 2.8rem; gap: 1.8rem; font-size: 3.1rem; font-weight: 700; white-space: nowrap; overflow: hidden; }
+  .addr svg { flex: none; width: 3.8rem; height: 3.8rem; }
+
+  .title { margin: 2.6rem 0 0 5.2rem; }
+  .title .l { line-height: 0; white-space: nowrap; }
+  .title .t { display: inline-block; position: relative; white-space: nowrap; font-size: 15.8rem; line-height: 1.13; letter-spacing: .2rem; border: .5rem solid transparent; padding: 0 1.2rem; margin-left: -1.7rem; }
+  .title .t > i, .title .who, .caret { display: none; }
+  /* 带选中框的是最后一行：旁边的小箭头和名字牌垂到下面的空白处，不会压到别的字 */
+  .title .l.is-last .t { border-color: var(--blue); background: rgba(47,107,255,.09); }
+  .title .l.is-last .t > i { display: block; position: absolute; width: 2.2rem; height: 2.2rem; background: #fff; border: .5rem solid var(--blue); }
+  .t > i:nth-child(1) { left: -1.3rem; top: -1.3rem; } .t > i:nth-child(2) { right: -1.3rem; top: -1.3rem; }
+  .t > i:nth-child(3) { left: -1.3rem; bottom: -1.3rem; } .t > i:nth-child(4) { right: -1.3rem; bottom: -1.3rem; }
+  .title .l.is-last .who { display: flex; position: absolute; right: -3.4rem; bottom: -6.4rem; align-items: flex-start; z-index: 3; }
+  .who svg { width: 5.4rem; height: 6rem; flex: none; }
+  .who b { margin: 2.6rem 0 0 -.6rem; background: var(--blue); color: #fff; font-size: 2.6rem; line-height: 1.5; padding: .2rem 1.6rem; border-radius: .6rem 1.6rem 1.6rem 1.6rem; letter-spacing: .2rem; white-space: nowrap; }
+  /* 它的上一行：蓝字，后面跟一个输入光标 */
+  .title .l:has(+ .l.is-last) .t { color: var(--blue); }
+  .title .l:has(+ .l.is-last) .caret { display: inline-block; width: 1.1rem; height: .78em; background: var(--ink); margin-left: .4rem; vertical-align: .09em; }
+  .title .l { font-size: 15.8rem; }
+
+  .buy { margin: 6.6rem 4rem 0; display: flex; align-items: flex-end; justify-content: space-between; }
+  .buy .lab { display: inline-block; background: var(--yellow); border: .5rem solid var(--ink); border-radius: 1.4rem; font-size: 3.2rem; padding: .2rem 1.8rem; letter-spacing: .3rem; white-space: nowrap; }
+  .buy .orig { font-size: 2.8rem; font-weight: 700; color: #777; text-decoration: line-through; margin: 0 1.2rem 1.6rem 0; white-space: nowrap; text-align: right; }
+  .buy .right { flex: none; margin-left: 2rem; }
+  .buy .pr { display: inline-flex; align-items: baseline; font-size: 20rem; line-height: .96; margin-top: .6rem; white-space: nowrap; }
+  .buy .cur { font-size: .5em; margin-right: .02em; }
+  .buy .n { letter-spacing: -.02em; }
+  .btn { flex: none; position: relative; background: var(--blue); color: #fff; border: .5rem solid var(--ink); box-shadow: .9rem .9rem 0 var(--ink); border-radius: 3rem; font-size: 3.8rem; padding: 2.2rem 3rem; letter-spacing: .1rem; margin: 0 0 2rem; white-space: nowrap; }
+  .btn svg { position: absolute; right: -.8rem; bottom: -4.4rem; width: 6rem; height: 6.6rem; }
+
+  .info { display: flex; gap: 3.4rem; align-items: stretch; margin-right: 1.2rem; }
+  .memo { flex: 1 1 0; min-width: 0; border-radius: 3.4rem; background: var(--note); padding: 0 3.4rem .6rem; }
+  .memo::before { content: ""; display: block; height: 3rem; margin: 0 -3.4rem 1.4rem; background: var(--yellow); border-bottom: .5rem solid var(--ink); border-radius: 2.8rem 2.8rem 0 0; }
+  .todo { display: flex; align-items: center; gap: 2.2rem; height: 11.6rem; }
+  .todo:not(.is-first) { border-top: .3rem dashed rgba(0,0,0,.25); }
+  .todo svg { flex: none; width: 5.8rem; height: 5.8rem; }
+  .todo h3 { font-size: 3.7rem; letter-spacing: .1rem; white-space: nowrap; }
+  .todo p { font-family: var(--thin); font-size: 2.4rem; font-weight: 500; color: #555; margin-top: .2rem; white-space: nowrap; }
+  .side { flex: none; width: 39.2rem; display: flex; flex-direction: column; gap: 3.2rem; }
+  .cal { flex: 1 1 auto; border-radius: 3.4rem; text-align: center; overflow: hidden; padding-bottom: 2.4rem; }
+  .cal small { display: block; background: var(--blue); color: #fff; font-size: 2.7rem; letter-spacing: 1rem; padding: .6rem 0 .8rem 1rem; border-bottom: .5rem solid var(--ink); }
+  .cal .date { display: inline-block; font-size: 5.6rem; line-height: 1.2; margin-top: 2.6rem; white-space: nowrap; letter-spacing: -.1rem; }
+  .cal .sub { display: block; font-size: 2.3rem; font-weight: 700; color: #555; margin-top: .4rem; white-space: nowrap; }
+  .pin { flex: none; min-height: 15rem; border-radius: 3.4rem; display: flex; align-items: center; gap: 1.2rem; padding: 1.6rem 2rem; }
+  .pin svg { flex: none; width: 5rem; height: 6rem; }
+  .pin span { font-size: 2.9rem; line-height: 1.3; }
+  /* 没有卖点时，时间和地点并排撑满一行 */
+  .memo[hidden] + .side { flex: 1 1 0; width: auto; flex-direction: row; }
+  .memo[hidden] + .side > * { flex: 1 1 0; }
+
+  .foot { display: flex; gap: 3rem; align-items: center; margin-right: 1.2rem; min-height: 6rem; }
+  .qr { flex: none; width: 18.4rem; height: 18.4rem; border-radius: 2.6rem; padding: 1.2rem; box-shadow: .8rem .8rem 0 var(--ink); }
+  .cap { display: inline-block; background: var(--ink); color: #fff; font-size: 2.6rem; letter-spacing: .4rem; padding: .3rem 1.8rem; border-radius: 99rem; }
+  .contact { font-size: 3rem; margin-top: 1.2rem; }
+  .fine { font-family: var(--thin); font-size: 2rem; font-weight: 500; color: #444; line-height: 1.6; margin-top: .6rem; }
+
+  /* 没有价格：标题更大 */
+  .win:has(.buy[hidden]) .t { --fit-max: 19; }
+  .win:has(.buy[hidden]) { padding-bottom: 9rem; }
+
+  /* 小红书版 */
+  html[data-size="3x4"] .poster { padding-top: 4.6rem; }
+  html[data-size="3x4"] .t { --fit-max: 13.2; }
+  html[data-size="3x4"] .win:has(.buy[hidden]) .t { --fit-max: 17; }
+  html[data-size="3x4"] .title .l { font-size: 13.2rem; }
+  html[data-size="3x4"] .buy { margin-top: 5.8rem; }
+  html[data-size="3x4"] .buy .pr { --fit-max: 17; }
+  html[data-size="3x4"] .win { padding-bottom: 2.6rem; }
+  html[data-size="3x4"] .todo { height: 9.6rem; }
+  html[data-size="3x4"] .pin { min-height: 11rem; }
+  html[data-size="3x4"] .cal .date { margin-top: 1.6rem; }
+  html[data-size="3x4"] .cal { padding-bottom: 1.4rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 20.4rem; height: 20.4rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="bg dots"></div>
+
+  <div class="win ui">
+    <div class="bar"><i></i><i></i><i></i><div class="tab" data-need="kicker logo"><span class="logo-inline" data-logo></span><span data-s="kicker"></span></div><span class="issue" data-s="issue"></span></div>
+    <div class="addr" data-need="slogan"><svg viewBox="0 0 38 38" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"><circle cx="16" cy="16" r="11"/><path d="M25,25 L35,35"/></svg><span data-s="slogan"></span></div>
+    <div class="title" data-count>
+      <div class="l" data-need="title.0"><span class="t" data-fit="880" data-max="15.8"><i></i><i></i><i></i><i></i><span data-s="title.0"></span><span class="who"><svg viewBox="0 0 54 60"><path d="M6,4 L48,26 L28,32 L20,54 Z" fill="#2f6bff" stroke="#111" stroke-width="5" stroke-linejoin="round"/></svg><b data-s="brand"></b></span></span><span class="caret"></span></div>
+      <div class="l" data-need="title.1"><span class="t" data-fit="880" data-max="15.8"><i></i><i></i><i></i><i></i><span data-s="title.1"></span><span class="who"><svg viewBox="0 0 54 60"><path d="M6,4 L48,26 L28,32 L20,54 Z" fill="#2f6bff" stroke="#111" stroke-width="5" stroke-linejoin="round"/></svg><b data-s="brand"></b></span></span><span class="caret"></span></div>
+      <div class="l" data-need="title.2"><span class="t" data-fit="880" data-max="15.8"><i></i><i></i><i></i><i></i><span data-s="title.2"></span><span class="who"><svg viewBox="0 0 54 60"><path d="M6,4 L48,26 L28,32 L20,54 Z" fill="#2f6bff" stroke="#111" stroke-width="5" stroke-linejoin="round"/></svg><b data-s="brand"></b></span></span><span class="caret"></span></div>
+    </div>
+    <div class="buy" data-need="price.num">
+      <div>
+        <div><span class="lab" data-s="price.label"></span></div>
+        <div class="pr" data-fit="520" data-max="20"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div>
+      </div>
+      <div class="right"><div class="orig" data-s="price.orig"></div><div class="btn" data-need="price.note"><span data-s="price.note"></span></div></div>
+    </div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="info" data-need="points.0.h date dateNote place">
+    <div class="memo ui" data-count>
+      <div class="todo" data-need="points.0.h"><svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="25" fill="#2f6bff" stroke="#111" stroke-width="5"/><path d="M17,30 L26,39 L42,20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3 data-s="points.0.h"></h3><p data-s="points.0.p"></p></div></div>
+      <div class="todo" data-need="points.1.h"><svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="25" fill="#2f6bff" stroke="#111" stroke-width="5"/><path d="M17,30 L26,39 L42,20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3 data-s="points.1.h"></h3><p data-s="points.1.p"></p></div></div>
+      <div class="todo" data-need="points.2.h"><svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="25" fill="#2f6bff" stroke="#111" stroke-width="5"/><path d="M17,30 L26,39 L42,20" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><div><h3 data-s="points.2.h"></h3><p data-s="points.2.p"></p></div></div>
+    </div>
+    <div class="side" data-need="date dateNote place">
+      <div class="cal ui" data-need="date dateNote"><small>时间</small><span class="date" data-s="date" data-fit="33rem" data-max="5.6"></span><span class="sub" data-s="dateNote"></span></div>
+      <div class="pin ui" data-need="place"><svg viewBox="0 0 50 60"><path d="M25,4 C12,4 5,13 5,24 C5,38 25,56 25,56 C25,56 45,38 45,24 C45,13 38,4 25,4 Z" fill="#2f6bff" stroke="#111" stroke-width="5" stroke-linejoin="round"/><circle cx="25" cy="24" r="7" fill="#fff"/></svg><span data-s="place"></span></div>
+    </div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="foot" data-need="qr.text qr.image contact fine.0 brand">
+    <div class="qr ui" data-qr data-need="qr.text qr.image"></div>
+    <div>
+      <span class="cap" data-s="qr.cap"></span>
+      <div class="contact join" data-need="brand contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+  </div>
+</div>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

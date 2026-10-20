@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>撞色国潮</title>
+<meta name="poster-fonts" content="Noto Sans SC">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：右上角的同心圆，加上价格印章。 */
+  :root { --red: #e62a1f; --deep: #8a0d12; --yellow: #ffd23f; --cream: #fff3d6; }
+  body { background: var(--red); color: var(--cream); font-family: var(--bold); font-weight: 900; }
+  .poster { padding: 5.6rem 5.6rem 5.4rem; }
+  .poster > .art, .poster > .grain { width: 100%; height: 100%; }
+  .poster > .grain { mix-blend-mode: multiply; opacity: .3; }
+  .hard { box-shadow: .9rem .9rem 0 var(--deep); }
+
+  .brand { align-self: flex-start; background: var(--cream); color: var(--deep); border-radius: 99rem; padding: .8rem 3rem; font-size: 3rem; letter-spacing: .4rem; white-space: nowrap; }
+  .kicker { margin: 4.2rem 0 0 .4rem; font-size: 4rem; letter-spacing: .3rem; white-space: nowrap; min-height: 5.4rem; max-width: 62rem; }
+  .kicker b { display: inline-block; background: var(--yellow); color: var(--deep); padding: .2rem 1.6rem .4rem; font-size: 3.2rem; border-radius: 1rem; vertical-align: .3rem; }
+  .kicker :not([hidden]) ~ b { margin-left: 1.4rem; }
+
+  .title { margin: 1.4rem 0 0 -.2rem; text-shadow: .9rem .9rem 0 var(--deep); }
+  .title .l { line-height: 0; }
+  .title .l span { display: inline-block; white-space: nowrap; font-size: 16rem; line-height: 1.08; letter-spacing: .3rem; --fit-max: 16; }
+  .title .l:nth-child(2) span { --fit-max: 17.2; }
+  /* 最后一行最大，用黄色 */
+  .title .l.is-last span { color: var(--yellow); letter-spacing: .6rem; --fit-max: 23.6; }
+  .title[data-count="1"] .l span { --fit-max: 17; }
+  .slogan { align-self: flex-start; margin-top: 3.4rem; background: var(--deep); border-radius: 99rem; padding: 1rem 3rem; font-size: 3.2rem; font-weight: 700; letter-spacing: .2rem; white-space: nowrap; }
+
+  .mid { display: flex; justify-content: space-between; align-items: center; }
+  .left { flex: none; width: 44rem; display: flex; flex-direction: column; align-items: flex-start; gap: 3rem; }
+  .note { background: var(--yellow); color: var(--deep); border-radius: 99rem; padding: .8rem 3rem 1rem; font-size: 3.4rem; white-space: nowrap; margin-bottom: .8rem; }
+  .tag { align-self: stretch; background: var(--cream); border-radius: 3.4rem; padding: 1.2rem 3rem 1.6rem; color: var(--deep); min-width: 0; }
+  .tag h3 { font-size: 3.6rem; letter-spacing: .1rem; white-space: nowrap; }
+  .tag p { font-size: 2.3rem; font-weight: 700; margin-top: .2rem; white-space: nowrap; }
+  .sun { flex: none; position: relative; width: 52rem; height: 52rem; margin: 0 -2.6rem 0 0; }
+  .sun svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(1.3rem 1.3rem 0 var(--deep)); }
+  .sun .in { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--red); }
+  .sun .lab { background: var(--red); color: var(--cream); font-size: 3.8rem; letter-spacing: .6rem; border-radius: 99rem; padding: .2rem 2.6rem .6rem 3.2rem; white-space: nowrap; }
+  .sun .pr { display: inline-flex; align-items: baseline; font-size: 19rem; line-height: 1; margin-top: .6rem; white-space: nowrap; }
+  .sun .cur { font-size: .45em; margin-right: .01em; }
+  .sun .n { letter-spacing: -.026em; }
+  .sun .orig { font-size: 2.9rem; font-weight: 700; color: var(--deep); text-decoration: line-through; white-space: nowrap; }
+  /* 没有价格：卖点横着排满 */
+  .mid:has(.sun[hidden]) .left { width: auto; flex: 1 1 0; flex-direction: row; align-items: stretch; flex-wrap: wrap; gap: 2.4rem; }
+  .mid:has(.sun[hidden]) .tag { flex: 1 1 0; align-self: auto; padding: 2rem 2.4rem 2.4rem; }
+  .mid:has(.sun[hidden]) .tag p { white-space: normal; margin-top: .8rem; }
+  .mid:has(.sun[hidden]) .note { flex-basis: auto; }
+  /* 没有卖点：印章放中间 */
+  .mid:has(.left[hidden]) { justify-content: center; }
+
+  .ticket { margin-top: 4.2rem; min-height: 14.2rem; background: var(--cream); color: var(--deep); border-radius: 3rem; display: flex; align-items: center; padding: 1.6rem 3.6rem; gap: 3rem; white-space: nowrap; }
+  .ticket .date { font-size: 7rem; color: var(--red); letter-spacing: -.1rem; }
+  .ticket .r { padding-left: 3rem; border-left: .4rem dashed var(--deep); }
+  .ticket .date[hidden] + .r { padding-left: 0; border-left: 0; }
+  .ticket .sub { font-size: 2.5rem; font-weight: 700; }
+  .ticket .place { font-size: 3.3rem; margin-top: .2rem; }
+
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; min-height: 6rem; padding-left: .4rem; }
+  .contact { font-size: 2.7rem; }
+  .fine { font-family: var(--thin); font-size: 1.9rem; font-weight: 500; line-height: 1.6; margin-top: .4rem; opacity: .92; }
+  .qr-box { flex: none; display: flex; align-items: center; gap: 1.4rem; margin-left: 2rem; }
+  .qr-box p { writing-mode: vertical-rl; font-size: 2.4rem; letter-spacing: .8rem; color: var(--yellow); }
+  .qr { width: 15.4rem; height: 15.4rem; background: var(--cream); border-radius: 2rem; padding: 1.1rem; }
+
+  /* 小红书版 */
+  html[data-size="3x4"] .poster { padding-top: 4.6rem; padding-bottom: 4.4rem; }
+  html[data-size="3x4"] .kicker { margin-top: 3rem; max-width: 76rem; }
+  html[data-size="3x4"] .title .l span { --fit-max: 13.4; }
+  html[data-size="3x4"] .title .l:nth-child(2) span { --fit-max: 14.6; }
+  html[data-size="3x4"] .title .l.is-last span { --fit-max: 19.6; }
+  html[data-size="3x4"] .slogan { margin-top: 2.6rem; }
+  html[data-size="3x4"] .sun { width: 46rem; height: 46rem; }
+  html[data-size="3x4"] .sun .pr { --fit-max: 17; }
+  html[data-size="3x4"] .left { gap: 2.2rem; }
+  html[data-size="3x4"] .ticket { margin-top: 3rem; min-height: 12.6rem; }
+  html[data-size="3x4"] .fine { font-size: 2.3rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 19.4rem; height: 19.4rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <svg class="bg art" viewBox="0 0 1080 1920" preserveAspectRatio="xMaxYMin meet">
+    <circle cx="1080" cy="0" r="430" fill="#ff86b8"/><circle cx="1080" cy="0" r="335" fill="#ff9a1f"/><circle cx="1080" cy="0" r="240" fill="#ffd23f"/><circle cx="1080" cy="0" r="145" fill="#fff3d6"/><circle cx="1080" cy="0" r="56" fill="#e62a1f"/>
+  </svg>
+
+  <div class="brand hard" data-need="brand logo"><span class="logo-inline" data-logo></span><span data-s="brand"></span></div>
+  <div class="kicker"><span data-s="kicker"></span><b data-s="issue"></b></div>
+  <div class="title" data-count>
+    <div class="l" data-need="title.0"><span data-s="title.0" data-fit="650" data-max="16"></span></div>
+    <div class="l" data-need="title.1"><span data-s="title.1" data-fit="960" data-max="17.2"></span></div>
+    <div class="l" data-need="title.2"><span data-s="title.2" data-fit="960" data-max="23.6"></span></div>
+  </div>
+  <div class="slogan" data-s="slogan"></div>
+  <div class="grow"></div>
+
+  <div class="mid" data-need="price.num points.0.h">
+    <div class="left" data-need="price.note points.0.h">
+      <div class="note hard" data-s="price.note"></div>
+      <div class="tag hard" data-need="points.0.h"><h3 data-s="points.0.h"></h3><p data-s="points.0.p"></p></div>
+      <div class="tag hard" data-need="points.1.h"><h3 data-s="points.1.h"></h3><p data-s="points.1.p"></p></div>
+      <div class="tag hard" data-need="points.2.h"><h3 data-s="points.2.h"></h3><p data-s="points.2.p"></p></div>
+    </div>
+    <div class="sun" data-need="price.num">
+      <svg viewBox="0 0 380 380" id="seal"></svg>
+      <div class="in">
+        <div class="lab" data-s="price.label"></div>
+        <div class="pr" data-fit="37rem" data-max="19"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div>
+        <div class="orig" data-s="price.orig"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ticket hard" data-need="date dateNote place">
+    <div class="date" data-s="date"></div>
+    <div class="r" data-need="dateNote place"><div class="sub" data-s="dateNote"></div><div class="place" data-s="place"></div></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="foot" data-need="brand contact fine.0 qr.text qr.image">
+    <div>
+      <div class="contact join" data-need="brand contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+    <div class="qr-box" data-need="qr.text qr.image"><p data-s="qr.cap"></p><div class="qr hard" data-qr data-dark="#5a0508" data-light="#fff3d6"></div></div>
+  </div>
+
+  <svg class="bg grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)"/></svg>
+</div>
+<script>
+  (function () {
+    var n = 22, pts = [];
+    for (var i = 0; i < n * 2; i++) {
+      var r = i % 2 === 0 ? 186 : 170, a = Math.PI * i / n;
+      pts.push((190 + r * Math.cos(a)).toFixed(1) + ',' + (190 + r * Math.sin(a)).toFixed(1));
+    }
+    document.getElementById('seal').innerHTML = '<polygon points="' + pts.join(' ') + '" fill="#ffd23f" stroke-linejoin="round"/>' +
+      '<circle cx="190" cy="190" r="150" fill="none" stroke="#e62a1f" stroke-width="3" stroke-dasharray="3 9"/>';
+  })();
+</script>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>漫画波普</title>
+<meta name="poster-fonts" content="Noto Sans SC, Bungee">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：特大的描边价格数字。没有价格时由标题顶上。 */
+  :root { --yellow: #ffd60a; --ink: #111; --red: #ff3b30; --cyan: #2ec4ff; --paper: #fffdf5; }
+  body { background: var(--yellow); color: var(--ink); font-family: var(--bold); font-weight: 900; }
+  .dots { background-image: radial-gradient(rgba(17,17,17,.16) .3rem, transparent .35rem); background-size: 2.4rem 2.4rem;
+    -webkit-mask: linear-gradient(160deg, #000 0%, transparent 38%, transparent 62%, #000 100%); mask: linear-gradient(160deg, #000 0%, transparent 38%, transparent 62%, #000 100%); }
+
+  .tape { margin: 5.6rem -6rem 0; height: 7.6rem; background: var(--ink); transform: rotate(-3deg); display: flex; align-items: center; white-space: nowrap; overflow: hidden;
+    box-shadow: 0 .8rem 0 var(--red); font-size: 4rem; color: var(--yellow); letter-spacing: .6rem; padding-left: 7rem; }
+  .tape i { font-style: normal; color: var(--red); margin: 0 1.8rem; }
+
+  .head { margin: 4.6rem 6.4rem 0; height: 8rem; display: flex; align-items: center; }
+  .brand { display: flex; align-items: center; gap: 1.8rem; }
+  .mark { width: 7.8rem; height: 7.8rem; border-radius: 50%; background: #fff; border: .5rem solid var(--ink); display: flex; align-items: center; justify-content: center; font-size: 4rem; overflow: hidden; }
+  .mark[data-logo] { padding: .8rem; }
+  .brand b { background: var(--paper); border: .5rem solid var(--ink); box-shadow: .7rem .7rem 0 var(--ink); font-size: 3.2rem; letter-spacing: .3rem; padding: .8rem 1.8rem; }
+  .star { position: absolute; right: -3.4rem; top: -3.4rem; width: 23.6rem; height: 23.6rem; transform: rotate(10deg); }
+  .star svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(.9rem .9rem 0 var(--ink)); }
+  .star b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 5.4rem; letter-spacing: .2rem; -webkit-text-stroke: .7rem var(--ink); paint-order: stroke fill; white-space: nowrap; }
+
+  /* 标题：第一行黑字，后面的行白字黑边；后两行放得下就并排 */
+  .title { margin: 3.6rem 5.2rem 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 1.6rem 3rem; transform: rotate(-3deg); transform-origin: left center; }
+  .title .l { line-height: 0; }
+  .title .l span { display: inline-block; white-space: nowrap; font-size: 11.2rem; line-height: 1.08; letter-spacing: .2rem; color: #fff; -webkit-text-stroke: .11em var(--ink); paint-order: stroke fill; text-shadow: .09em .09em 0 var(--red); }
+  .title .l.is-first:not(.is-last) { flex-basis: 100%; }
+  .title .l.is-first:not(.is-last) span { color: var(--ink); -webkit-text-stroke: 0; text-shadow: .06em .06em 0 #fff; letter-spacing: .4rem; }
+  .bubble { align-self: flex-start; margin: 3.4rem 0 0 6rem; background: #fff; border: .6rem solid var(--ink); border-radius: 5rem; padding: 1.2rem 2.8rem; font-size: 3.6rem; letter-spacing: .2rem; transform: rotate(-3deg); box-shadow: .8rem .8rem 0 var(--ink); }
+  .bubble::after { content: ""; position: absolute; right: -4rem; top: 1.2rem; border-left: 5.2rem solid var(--ink); border-top: 1.8rem solid transparent; border-bottom: 1.8rem solid transparent; }
+  .bubble::before { content: ""; position: absolute; right: -2.8rem; top: 1.8rem; z-index: 1; border-left: 3.6rem solid #fff; border-top: 1.2rem solid transparent; border-bottom: 1.2rem solid transparent; }
+
+  /* 主数字 */
+  .poster > .hero { z-index: 0; text-align: center; transform: rotate(-4deg); margin: 2rem 0 1rem; }
+  .rays { position: absolute; left: 50%; top: 50%; width: 210rem; height: 210rem; transform: translate(-50%, -50%); z-index: -1; pointer-events: none;
+    background: repeating-conic-gradient(from 3deg, rgba(255,255,255,.42) 0deg 7deg, transparent 7deg 20deg);
+    -webkit-mask: radial-gradient(circle, #000 12%, transparent 44%); mask: radial-gradient(circle, #000 12%, transparent 44%); }
+  .big { display: inline-flex; align-items: baseline; font-family: "Bungee", var(--bold); font-weight: 400; font-size: 35rem; line-height: 1; color: #fff; white-space: nowrap;
+    -webkit-text-stroke: .052em var(--ink); paint-order: stroke fill; text-shadow: .043em .043em 0 var(--red); }
+  .big .cur { font-size: .54em; margin-right: .03em; }
+  .big .num { letter-spacing: .01em; }
+  .lab { position: absolute; left: 7.2rem; top: .4rem; background: var(--ink); color: var(--yellow); font-size: 4.6rem; letter-spacing: .4rem; padding: .6rem 2.4rem; transform: rotate(-4deg); box-shadow: .7rem .7rem 0 var(--red); white-space: nowrap; }
+  .orig { position: absolute; right: 6rem; bottom: -1.6rem; background: var(--paper); border: .5rem solid var(--ink); box-shadow: .7rem .7rem 0 var(--ink); font-size: 3.6rem; padding: .6rem 2rem; transform: rotate(8deg); white-space: nowrap;
+    text-decoration: line-through; text-decoration-color: var(--red); text-decoration-thickness: .5rem; }
+
+  .strip { margin: 0 -2rem; height: 8.2rem; background: var(--ink); color: #fff; transform: rotate(1.2deg); display: flex; align-items: center; justify-content: center; gap: 2.8rem; box-shadow: 0 -.8rem 0 var(--red); white-space: nowrap; }
+  .strip .a { font-family: "Bungee", var(--bold); font-weight: 400; font-size: 5rem; color: var(--yellow); letter-spacing: .2rem; }
+  .strip .b { font-size: 3.4rem; letter-spacing: .1rem; }
+
+  .points { margin: 4.6rem 5.6rem 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.6rem; }
+  .points[data-count="2"] { grid-template-columns: repeat(2, 1fr); }
+  .points[data-count="1"] { grid-template-columns: 1fr; }
+  .p { background: var(--paper); border: .5rem solid var(--ink); box-shadow: .8rem .8rem 0 var(--ink); border-radius: 1.6rem; padding: 1.8rem 1.6rem 2.4rem; min-width: 0; }
+  .p:nth-child(1) { transform: rotate(-1.5deg); }
+  .p:nth-child(2) { transform: rotate(1.5deg) translateY(.6rem); background: var(--cyan); }
+  .p:nth-child(3) { transform: rotate(-1deg); background: var(--red); color: #fff; }
+  .p h3 { line-height: 0; }
+  .p h3 span { display: inline-block; font-size: 3.5rem; letter-spacing: .1rem; line-height: 1.25; white-space: nowrap; }
+  .p p { font-size: 2.3rem; font-weight: 700; line-height: 1.4; margin-top: .6rem; }
+
+  .band { margin: 4.4rem -2rem 0; height: 8rem; background: var(--red); color: var(--yellow); transform: rotate(-1.5deg); display: flex; align-items: center; justify-content: center; gap: 2.4rem;
+    font-size: 4.2rem; letter-spacing: .4rem; border-top: .5rem solid var(--ink); border-bottom: .5rem solid var(--ink); white-space: nowrap; }
+  .band i { font-style: normal; color: #fff; }
+
+  .foot { margin: 0 6.4rem 2.6rem; display: flex; justify-content: space-between; align-items: flex-end; min-height: 12rem; }
+  .due { display: inline-block; background: var(--red); color: #fff; border: .5rem solid var(--ink); box-shadow: .7rem .7rem 0 var(--ink); font-size: 3.8rem; letter-spacing: .2rem; padding: .6rem 2.2rem; transform: rotate(-2deg); white-space: nowrap; }
+  .site { font-size: 3.2rem; margin-top: 1.8rem; }
+  .fine { font-family: var(--bold); font-size: 2rem; font-weight: 700; margin-top: .8rem; line-height: 1.6; opacity: .82; }
+  .qr-box { text-align: center; transform: rotate(3deg); margin-left: 2rem; }
+  .qr { width: 16rem; height: 16rem; background: #fff; border: .6rem solid var(--ink); box-shadow: .8rem .8rem 0 var(--ink); border-radius: 1.4rem; padding: .8rem; }
+  .qr-box p { font-size: 2.6rem; margin-top: .8rem; letter-spacing: .3rem; white-space: nowrap; }
+
+  /* 没有价格：标题放大，顶上主角的位置 */
+  .poster:has(.hero[hidden]) .title { margin-top: 5rem; gap: 2.4rem 3rem; }
+  .poster:has(.hero[hidden]) .title .l span { --fit-max: 17; }
+  .poster:has(.hero[hidden]) .bubble { font-size: 4.4rem; margin-top: 4.6rem; }
+
+  /* 小红书版 */
+  html[data-size="3x4"] .tape { margin-top: 5rem; }
+  html[data-size="3x4"] .head { margin-top: 3.6rem; }
+  html[data-size="3x4"] .title { margin-top: 2.6rem; }
+  html[data-size="3x4"] .bubble { margin-top: 2.6rem; }
+  html[data-size="3x4"] .poster > .hero { margin: 0; }
+  html[data-size="3x4"] .points { margin-top: 3.6rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 20rem; height: 20rem; }
+  html[data-size="3x4"] .band { margin-top: 3.6rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="bg dots"></div>
+
+  <div class="tape" data-bleed data-need="kicker issue">
+    <span data-s="kicker"></span><i>✦</i><span data-s="issue"></span><i>✦</i>
+    <span data-s="kicker"></span><i>✦</i><span data-s="issue"></span><i>✦</i>
+    <span data-s="kicker"></span><i>✦</i><span data-s="issue"></span><i>✦</i>
+    <span data-s="kicker"></span><i>✦</i><span data-s="issue"></span>
+  </div>
+
+  <div class="head">
+    <div class="brand" data-need="brand logo"><div class="mark" data-logo></div><div class="mark" data-nologo data-s="mark"></div><b data-s="brand"></b></div>
+    <div class="star" data-need="issue" data-bleed><svg viewBox="0 0 380 380" id="burst"></svg><b data-s="issue"></b></div>
+  </div>
+
+  <div class="title" data-count>
+    <div class="l" data-need="title.0"><span data-s="title.0" data-fit="760" data-max="11.2"></span></div>
+    <div class="l" data-need="title.1"><span data-s="title.1" data-fit="940" data-max="11.2"></span></div>
+    <div class="l" data-need="title.2"><span data-s="title.2" data-fit="940" data-max="11.2"></span></div>
+  </div>
+  <div class="bubble" data-s="slogan"></div>
+  <div class="grow"></div>
+
+  <div class="hero" data-need="price.num">
+    <div class="rays"></div>
+    <div class="lab" data-s="price.label"></div>
+    <div class="big" data-fit="900" data-max="35"><span class="cur" data-s="price.cur"></span><span class="num" data-s="price.num"></span></div>
+    <div class="orig" data-s="price.orig"></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="strip" data-bleed data-need="date dateNote"><span class="a" data-s="date"></span><span class="b" data-s="dateNote"></span></div>
+
+  <div class="points" data-count>
+    <div class="p" data-need="points.0.h"><h3><span data-s="points.0.h" data-fit="268" data-max="3.5"></span></h3><p data-s="points.0.p"></p></div>
+    <div class="p" data-need="points.1.h"><h3><span data-s="points.1.h" data-fit="268" data-max="3.5"></span></h3><p data-s="points.1.p"></p></div>
+    <div class="p" data-need="points.2.h"><h3><span data-s="points.2.h" data-fit="268" data-max="3.5"></span></h3><p data-s="points.2.p"></p></div>
+  </div>
+
+  <div class="band" data-bleed data-need="place"><i>✦</i><span data-s="place"></span><i>✦</i></div>
+  <div class="grow"></div>
+
+  <div class="foot" data-need="price.note brand contact fine.0 qr.text qr.image">
+    <div>
+      <div class="due" data-s="price.note"></div>
+      <div class="site join slash" data-need="brand contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+    <div class="qr-box" data-need="qr.text qr.image"><div class="qr" data-qr></div><p data-s="qr.cap"></p></div>
+  </div>
+</div>
+<script>
+  (function () {
+    var n = 18, cx = 190, cy = 190, R = 185, r = 138, pts = [];
+    for (var i = 0; i < n * 2; i++) {
+      var rad = i % 2 === 0 ? R : r, a = Math.PI * i / n - Math.PI / 2;
+      pts.push((cx + rad * Math.cos(a)).toFixed(1) + ',' + (cy + rad * Math.sin(a)).toFixed(1));
+    }
+    document.getElementById('burst').innerHTML = '<polygon points="' + pts.join(' ') + '" fill="#ff3b30" stroke="#111" stroke-width="7" stroke-linejoin="round"/>';
+  })();
+</script>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

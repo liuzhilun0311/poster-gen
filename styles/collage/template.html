@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>拼贴剪报</title>
+<meta name="poster-fonts" content="Noto Sans SC, Noto Serif SC">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：标题一个字一块，像从报纸上剪下来贴的。其余的纸片都摆正。 */
+  :root { --ink: #131313; --pink: #ff4f8b; --yellow: #ffe14a; --red: #e5322d; --paper: #ebe4d6; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--bold); font-weight: 900; }
+  .poster { padding: 0 4.4rem 3.6rem; }
+  .serif { font-family: var(--serif); font-weight: 900; }
+  .poster > .grain { width: 100%; height: 100%; mix-blend-mode: multiply; opacity: .45; }
+  .w { filter: drop-shadow(.4rem .8rem .7rem rgba(0,0,0,.28)); }
+  .tape { position: absolute; width: 15rem; height: 4.4rem; background: rgba(255,79,139,.72); box-shadow: 0 .1rem .3rem rgba(0,0,0,.15); }
+
+  /* 黑色的撕纸铺在标题后面，标题有几行它就有多高 */
+  .head { margin: 0 -4.4rem; padding: 5.8rem 4.4rem 7.4rem; }
+  .head .black { position: absolute; inset: -3rem -3rem 0; transform: rotate(-1.5deg); z-index: -1; }
+  .head .black .torn { width: 100%; height: 100%; background: var(--ink); }
+  .label { display: flex; gap: 1.2rem; transform: rotate(-2deg); transform-origin: left center; font-size: 3rem; letter-spacing: .5rem; white-space: nowrap; margin-left: 1rem; min-height: 5rem; }
+  .label > span:not([hidden]) { background: #fff; color: var(--ink); padding: .4rem 1.8rem .6rem; }
+  .label b { background: var(--pink); color: #fff; padding: .4rem 1.6rem .6rem; }
+  .label em { font-style: normal; background: var(--yellow); color: var(--ink); padding: .4rem 1.6rem .6rem; }
+
+  .title { margin-top: 2.6rem; }
+  .title .l { display: flex; height: 19.6rem; align-items: center; }
+  .title .chars { display: inline-flex; align-items: center; gap: .07em; white-space: nowrap; font-size: 14.2rem; }
+  .c { display: inline-flex; align-items: center; justify-content: center; line-height: 1.14; padding: 0 .1em .04em; box-shadow: .03em .04em .056em rgba(0,0,0,.35); }
+  .sp { width: .18em; }
+  .c0 { background: #fff; color: var(--ink); transform: rotate(-2deg); }
+  .c1 { background: var(--yellow); color: var(--ink); transform: rotate(2deg); font-family: var(--serif); }
+  .c2 { background: #fff; color: var(--ink); transform: rotate(-1deg); }
+  .c3 { background: var(--pink); color: #fff; transform: rotate(2.5deg); }
+  .c4 { background: #fff; color: var(--ink); transform: rotate(-2.5deg); font-family: var(--serif); }
+  .c5 { background: var(--yellow); color: var(--ink); transform: rotate(1.5deg); }
+
+  .slip { align-self: flex-start; margin: -4.4rem 0 0 1.2rem; }
+  .slip .torn { background: #fff; padding: 1.4rem 3.4rem 1.8rem; font-size: 3.6rem; letter-spacing: .2rem; white-space: nowrap; }
+
+  .yel { height: 32.2rem; transform: rotate(-1deg); }
+  .yel .torn { position: absolute; inset: 0; background: var(--yellow); }
+  .yel .pr { position: absolute; left: 4.6rem; top: 0; bottom: 0; display: flex; align-items: center; }
+  .yel .pr > div { display: inline-flex; align-items: baseline; font-size: 24.4rem; line-height: 1; white-space: nowrap; }
+  .yel .cur { font-size: .53em; margin-right: .02em; }
+  .yel .n { letter-spacing: -.025em; }
+  .yel .side { position: absolute; right: 4.6rem; bottom: 6.4rem; text-align: right; }
+  .yel .note { display: inline-block; background: var(--ink); color: #fff; font-size: 3.4rem; padding: .4rem 1.8rem .8rem; margin-top: 1.4rem; white-space: nowrap; }
+  .stamp { position: absolute; right: 4rem; top: -2.6rem; border: .6rem double var(--red); color: var(--red); font-size: 4.6rem; letter-spacing: .6rem; padding: .2rem 1.6rem .6rem 2.2rem; transform: rotate(5deg); background: var(--yellow); white-space: nowrap; }
+  .orig { font-size: 3.2rem; text-decoration: line-through; text-decoration-thickness: .3rem; white-space: nowrap; }
+
+  .rows { margin: 4.4rem 0 0 1.2rem; display: flex; flex-direction: column; gap: 2.2rem; }
+  .row { display: flex; align-items: center; gap: 1.8rem; white-space: nowrap; }
+  .row b { background: var(--ink); color: #fff; font-size: 3.5rem; letter-spacing: .5rem; padding: .6rem 1.2rem .8rem 1.8rem; box-shadow: .3rem .4rem .5rem rgba(0,0,0,.3); }
+  .row > span { font-size: 2.8rem; }
+
+  .last { display: flex; justify-content: space-between; align-items: flex-end; gap: 3rem; }
+  .last .lf { flex: 1 1 0; min-width: 0; }
+  .tk { height: 17.6rem; max-width: 70rem; }
+  .tk .torn { width: 100%; height: 100%; background: #fff; padding: 1.6rem 3rem 0 5.6rem; background-image: radial-gradient(circle at 1.8rem 50%, var(--paper) .9rem, transparent 1rem); background-size: 100% 3.4rem; }
+  .tk .date { font-size: 7.2rem; line-height: 1.1; letter-spacing: -.1rem; white-space: nowrap; }
+  .tk .sub { font-size: 2.5rem; font-weight: 700; margin-top: .2rem; white-space: nowrap; }
+  .tk .sub b { background: var(--ink); color: #fff; padding: .2rem 1.2rem .4rem; }
+  .tk .sub :not([hidden]) ~ b { margin-left: 1.2rem; }
+  .foot { margin: 3rem 0 0 1.2rem; }
+  .contact { font-size: 2.5rem; }
+  .fine { font-family: var(--thin); font-size: 1.9rem; font-weight: 500; line-height: 1.55; margin-top: .2rem; color: #333; }
+  .pola { flex: none; position: relative; width: 23.2rem; transform: rotate(-2deg); background: #fff; padding: 1.6rem 1.6rem 1rem; text-align: center; margin: 0 .6rem 1rem 0; }
+  .pola .tape { left: 4rem; top: -2.2rem; transform: rotate(3deg); }
+  .pola .qr { width: 20rem; height: 20rem; }
+  .pola p { font-size: 2.7rem; letter-spacing: .6rem; margin-top: .6rem; white-space: nowrap; }
+
+  /* 没有价格：卖点放大 */
+  .yel[hidden] + .rows { margin-top: 0; gap: 3.4rem; }
+  .yel[hidden] + .rows .row b { font-size: 4.8rem; }
+  .yel[hidden] + .rows .row > span { font-size: 3.4rem; }
+
+  /* 小红书版 */
+  html[data-size="3x4"] .head { padding: 4.6rem 4.4rem 6.6rem; }
+  html[data-size="3x4"] .title { margin-top: 1.6rem; }
+  html[data-size="3x4"] .title .l { height: 16.8rem; }
+  html[data-size="3x4"] .title .chars { --fit-max: 12.2; }
+  html[data-size="3x4"] .yel { height: 27rem; }
+  html[data-size="3x4"] .yel .pr > div { --fit-max: 21; }
+  html[data-size="3x4"] .yel .side { bottom: 4.6rem; }
+  html[data-size="3x4"] .rows { margin-top: 3.4rem; gap: 1.6rem; }
+  html[data-size="3x4"] .foot { margin-top: 2rem; }
+  html[data-size="3x4"] .fine { font-size: 2.3rem; }
+  html[data-size="3x4"] .pola { width: 21.2rem; }
+  html[data-size="3x4"] .pola .qr { width: 18rem; height: 18rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="head">
+    <div class="w black"><div class="torn" data-seed="3"></div></div>
+    <div class="label" data-need="kicker issue brand logo"><span data-s="kicker"></span><b data-s="issue"></b><em data-need="brand logo"><span class="logo-inline" data-logo></span><span data-s="brand"></span></em></div>
+    <div class="title" data-count>
+      <div class="l" data-need="title.0"><div class="chars" data-s="title.0" data-chars data-fit="985" data-max="14.2"></div></div>
+      <div class="l" data-need="title.1"><div class="chars" data-s="title.1" data-chars data-fit="985" data-max="14.2"></div></div>
+      <div class="l" data-need="title.2"><div class="chars" data-s="title.2" data-chars data-fit="985" data-max="14.2"></div></div>
+    </div>
+  </div>
+  <div class="w slip" data-need="slogan"><div class="torn serif" data-seed="11" data-s="slogan"></div></div>
+  <div class="grow"></div>
+
+  <div class="w yel" data-need="price.num">
+    <div class="torn" data-seed="5"></div>
+    <div class="pr"><div data-fit="540" data-max="24.4"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div></div>
+    <div class="stamp serif" data-s="price.label"></div>
+    <div class="side"><div class="orig serif" data-s="price.orig"></div><div><span class="note" data-s="price.note"></span></div></div>
+  </div>
+
+  <div class="rows" data-count>
+    <div class="row" data-need="points.0.h"><b data-s="points.0.h"></b><span class="serif" data-s="points.0.p"></span></div>
+    <div class="row" data-need="points.1.h"><b data-s="points.1.h"></b><span class="serif" data-s="points.1.p"></span></div>
+    <div class="row" data-need="points.2.h"><b data-s="points.2.h"></b><span class="serif" data-s="points.2.p"></span></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="last" data-need="date dateNote place contact fine.0 qr.text qr.image brand">
+    <div class="lf">
+      <div class="w tk" data-need="date dateNote place"><div class="torn" data-seed="7"><div class="date" data-s="date"></div><div class="sub"><span data-s="dateNote"></span><b data-s="place"></b></div></div></div>
+      <div class="foot" data-need="brand contact fine.0">
+        <div class="contact join" data-need="brand contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+        <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+      </div>
+    </div>
+    <div class="w pola" data-need="qr.text qr.image"><div class="tape"></div><div class="qr" data-qr></div><p class="serif" data-s="qr.cap"></p></div>
+  </div>
+
+  <svg class="bg grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)"/></svg>
+</div>
+<script>
+  // 把 .torn 的边缘剪成撕纸的毛边（每块给一个固定的数，保证每次出图一样）。等字都排好、尺寸定了再剪。
+  window.POSTER_AFTER = function () {
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    Array.prototype.forEach.call(document.querySelectorAll('.torn'), function (el) {
+      var seed = parseInt(el.getAttribute('data-seed'), 10) || 1, w = el.offsetWidth, h = el.offsetHeight, pts = [], step = 2 * rem, j = .9 * rem;
+      if (!w || !h) return;
+      function r() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280 * j; }
+      for (var x = 0; x <= w; x += step) pts.push([x, r()]);
+      for (var y = step; y <= h; y += step) pts.push([w - r(), y]);
+      for (x = w; x >= 0; x -= step) pts.push([x, h - r()]);
+      for (y = h - step; y > 0; y -= step) pts.push([r(), y]);
+      el.style.clipPath = 'polygon(' + pts.map(function (p) { return p[0].toFixed(1) + 'px ' + p[1].toFixed(1) + 'px'; }).join(',') + ')';
+    });
+  };
+</script>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>

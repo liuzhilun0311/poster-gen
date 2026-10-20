@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>抖音故障</title>
+<meta name="poster-fonts" content="Noto Sans SC">
+<link rel="stylesheet" href="../../engine/base.css">
+<script src="../../engine/qrcode.min.js"></script>
+<script src="../../engine/fonts.js"></script>
+<style>
+  /* 只有一个大胆的地方：标题的青红错位重影。 */
+  :root { --bg: #08080b; --cy: #25f4ee; --pk: #fe2c55; }
+  body { background: var(--bg); color: #fff; font-family: var(--bold); font-weight: 900; }
+  .poster { padding: 5.4rem 5.6rem 3.4rem; }
+  .poster > .glow1 { inset: -26rem -32rem auto auto; width: 90rem; height: 90rem; border-radius: 50%; background: radial-gradient(circle, rgba(37,244,238,.38), transparent 62%); }
+  .poster > .glow2 { inset: 40% auto auto -38rem; width: 100rem; height: 100rem; border-radius: 50%; background: radial-gradient(circle, rgba(254,44,85,.2), transparent 62%); }
+  .poster > .floor { inset: auto -40rem -12rem -40rem; height: 76rem; transform: perspective(62rem) rotateX(64deg); transform-origin: center bottom;
+    background-image: linear-gradient(rgba(37,244,238,.5) .2rem, transparent .2rem), linear-gradient(90deg, rgba(254,44,85,.5) .2rem, transparent .2rem); background-size: 9rem 9rem;
+    -webkit-mask: linear-gradient(transparent 4%, #000 70%); mask: linear-gradient(transparent 4%, #000 70%); opacity: .22; }
+  .poster > .shade { inset: auto 0 0 0; height: 52rem; background: linear-gradient(transparent, rgba(8,8,11,.86) 55%); }
+  .poster > .grain { width: 100%; height: 100%; mix-blend-mode: screen; opacity: .16; }
+
+  .top { display: flex; justify-content: space-between; align-items: center; font-size: 3rem; letter-spacing: .3rem; min-height: 5.6rem; }
+  .brand { display: flex; align-items: center; gap: 1.4rem; white-space: nowrap; }
+  .mark { width: 5.2rem; height: 5.2rem; background: var(--pk); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; box-shadow: -.5rem -.5rem 0 var(--cy); letter-spacing: 0; }
+  .mark[data-logo] { background: #fff; padding: .4rem; }
+  .issue { margin-left: auto; border: .3rem solid var(--cy); color: var(--cy); border-radius: 99rem; padding: .6rem 2.4rem; font-size: 2.6rem; box-shadow: 0 0 2.2rem rgba(37,244,238,.6), inset 0 0 1.4rem rgba(37,244,238,.35); white-space: nowrap; }
+
+  .tape { margin: 5.6rem -13.6rem 0; height: 7rem; display: flex; align-items: center; white-space: nowrap; overflow: hidden; font-size: 3.4rem; letter-spacing: .5rem; padding-left: 9rem; background: var(--cy); color: #08080b; transform: rotate(-5deg); }
+  .tape i { font-style: normal; margin: 0 2.2rem; }
+
+  .title { margin: 5rem 0 0 .6rem; }
+  .title .l { line-height: 0; transform: skewX(-9deg); transform-origin: left center; }
+  .title span { position: relative; display: inline-block; white-space: nowrap; font-size: 20rem; line-height: 1.04; text-shadow: -.04em -.015em 0 var(--cy), .04em .015em 0 var(--pk); }
+  .slogan { align-self: flex-start; margin: 3.6rem 0 0 .6rem; font-size: 3.6rem; font-weight: 700; letter-spacing: .2rem; padding-left: 2.2rem; border-left: .8rem solid var(--pk); }
+
+  .price { display: flex; justify-content: space-between; align-items: flex-end; }
+  .lab { display: inline-block; background: var(--cy); color: #08080b; font-size: 3.8rem; padding: .2rem 2.2rem .6rem; letter-spacing: .4rem; white-space: nowrap; }
+  .pr { display: flex; }
+  .pr > div { display: inline-flex; align-items: baseline; font-size: 25.6rem; line-height: .98; white-space: nowrap; margin-top: .4rem; }
+  .pr .cur { font-size: .48em; margin-right: .03em; }
+  .pr .n { letter-spacing: -.016em; }
+  .side { text-align: right; padding: 0 0 3.4rem 2rem; }
+  .orig { font-size: 3.4rem; font-weight: 700; color: #9a9aa5; text-decoration: line-through; white-space: nowrap; }
+  .note { display: inline-block; margin-top: 1.8rem; border: .3rem solid var(--pk); border-radius: 99rem; padding: 1rem 2.6rem; font-size: 2.9rem; white-space: nowrap; }
+
+  .pts { margin-top: 3.6rem; }
+  .pt { display: flex; align-items: center; gap: 1.8rem; height: 5.8rem; border-bottom: .1rem solid rgba(255,255,255,.2); white-space: nowrap; }
+  .pt::before { content: ""; border-left: 2.2rem solid var(--pk); border-top: 1.3rem solid transparent; border-bottom: 1.3rem solid transparent; }
+  .pt h3 { font-size: 3.9rem; letter-spacing: .1rem; }
+  .pt p { font-family: var(--thin); font-size: 2.4rem; font-weight: 500; color: #b7b7c2; margin-left: auto; }
+
+  .foot { display: flex; justify-content: space-between; align-items: flex-end; min-height: 8rem; }
+  .date { display: inline-block; font-size: 6.6rem; line-height: 1.1; color: var(--cy); letter-spacing: .1rem; white-space: nowrap; }
+  .sub { font-size: 2.6rem; font-weight: 700; margin-top: 1rem; white-space: nowrap; }
+  .sub :not([hidden]) ~ b { margin-left: 1.4rem; }
+  .contact { font-size: 2.2rem; font-weight: 700; margin-top: 1rem; }
+  .fine { font-family: var(--thin); font-size: 1.9rem; font-weight: 500; color: #9a9aa5; line-height: 1.55; margin-top: .2rem; }
+  .qr-box { flex: none; text-align: center; margin-left: 2rem; }
+  .qr { width: 16.2rem; height: 16.2rem; background: #fff; padding: 1rem; box-shadow: -.7rem -.7rem 0 var(--cy), .7rem .7rem 0 var(--pk); }
+  .qr-box p { font-size: 2.1rem; letter-spacing: .6rem; margin: 1.6rem -.6rem 0 0; color: var(--cy); white-space: nowrap; }
+
+  /* 没有价格：卖点放大 */
+  .price[hidden] ~ .pts .pt { height: 9rem; }
+  .price[hidden] ~ .pts .pt h3 { font-size: 5.2rem; }
+  .price[hidden] ~ .pts .pt p { font-size: 3rem; }
+
+  /* 小红书版：标题不能再撑满整行那么高 */
+  html[data-size="3x4"] .poster { padding-top: 4.6rem; }
+  html[data-size="3x4"] .tape { margin-top: 4.4rem; }
+  html[data-size="3x4"] .title { margin-top: 3.6rem; }
+  html[data-size="3x4"] .title span { --fit-max: 19.5; }
+  html[data-size="3x4"] .slogan { margin-top: 2.6rem; }
+  html[data-size="3x4"] .pr > div { --fit-max: 21; }
+  html[data-size="3x4"] .pts { margin-top: 2.4rem; }
+  /* 小红书版整体缩小了，二维码要放大回 130 像素以上 */
+  html[data-size="3x4"] .qr { width: 19.2rem; height: 19.2rem; }
+  html[data-size="3x4"] .contact, html[data-size="3x4"] .qr-box p { font-size: 2.3rem; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <div class="bg glow1"></div><div class="bg glow2"></div><div class="bg floor"></div><div class="bg shade"></div>
+
+  <div class="top">
+    <div class="brand" data-need="brand logo"><div class="mark" data-logo></div><div class="mark" data-nologo data-s="mark"></div><span data-s="brand"></span></div>
+    <div class="issue" data-s="issue"></div>
+  </div>
+
+  <div class="tape" data-bleed data-need="kicker">
+    <span data-s="kicker"></span><i>✦</i><span data-s="kicker"></span><i>✦</i><span data-s="kicker"></span><i>✦</i><span data-s="kicker"></span><i>✦</i><span data-s="kicker"></span>
+  </div>
+
+  <div class="title" data-count>
+    <div class="l" data-need="title.0"><span data-s="title.0" data-fit="930" data-max="25"></span></div>
+    <div class="l" data-need="title.1"><span data-s="title.1" data-fit="930" data-max="25"></span></div>
+    <div class="l" data-need="title.2"><span data-s="title.2" data-fit="930" data-max="25"></span></div>
+  </div>
+  <div class="slogan" data-s="slogan"></div>
+  <div class="grow"></div>
+
+  <div class="price" data-need="price.num">
+    <div>
+      <div class="lab" data-s="price.label"></div>
+      <div class="pr"><div data-fit="560" data-max="25.6"><span class="cur" data-s="price.cur"></span><span class="n" data-s="price.num"></span></div></div>
+    </div>
+    <div class="side"><div class="orig" data-s="price.orig"></div><div class="note" data-s="price.note"></div></div>
+  </div>
+
+  <div class="pts" data-count>
+    <div class="pt" data-need="points.0.h"><h3 data-s="points.0.h"></h3><p data-s="points.0.p"></p></div>
+    <div class="pt" data-need="points.1.h"><h3 data-s="points.1.h"></h3><p data-s="points.1.p"></p></div>
+    <div class="pt" data-need="points.2.h"><h3 data-s="points.2.h"></h3><p data-s="points.2.p"></p></div>
+  </div>
+  <div class="grow"></div>
+
+  <div class="foot" data-need="date dateNote place contact fine.0 qr.text qr.image">
+    <div>
+      <div class="date" data-s="date"></div>
+      <div class="sub" data-need="dateNote place"><span data-s="dateNote"></span><b data-s="place"></b></div>
+      <div class="contact join" data-need="contact"><span data-s="brand"></span><span data-s="contact"></span></div>
+      <div class="fine"><div data-s="fine.0"></div><div data-s="fine.1"></div></div>
+    </div>
+    <div class="qr-box" data-need="qr.text qr.image"><div class="qr" data-qr></div><p data-s="qr.cap"></p></div>
+  </div>
+
+  <svg class="bg grain"><filter id="gr"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(#gr)"/></svg>
+</div>
+<script src="../../engine/fill.js"></script>
+</body>
+</html>
