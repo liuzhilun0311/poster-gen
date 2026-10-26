@@ -1,5 +1,5 @@
 interface:
-  display_name: "海报制作"
+  display_name: "海报制作 (poster-gen)"
   short_description: "本地排版生成海报，支持八种风格总览、价格日期和二维码，无需生成服务密钥"
   default_prompt: "使用 $poster-gen 为周末读书会制作海报，先展示可选风格。"
 policy:
